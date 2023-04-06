@@ -1,0 +1,159 @@
+name: __name___Az
+on:
+  workflow_dispatch:
+    inputs:
+      accounts_ondemand:
+        description: 'Enter the accounts, separated by commas'
+  #schedule:
+  #  - cron: '__cron__'
+
+env:
+  ACI_PREFIX: "aci"
+
+jobs:
+
+  # define matrix for all executions
+  # ------------------------
+  DefineMatrix:
+    runs-on: ubuntu-latest
+    outputs:
+      accounts: ${{ steps.get-accounts.outputs.IDs }}
+    steps:
+    - name: Get Accounts
+      id: get-accounts
+      env:
+        accounts_ondemand: ${{ inputs.accounts_ondemand }}
+      run: |
+        if [ -z "$accounts_ondemand" ]; then
+          echo "The accounts input is empty."
+          echo $(echo ${{ secrets.MATRIX }} | base64 --decode) > originalData.json
+          echo 'IDs<<EOF' >> $GITHUB_OUTPUT
+          jq '[.[] | select(.affinity=="__affinity__") | { the_id: .id }]' originalData.json >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+          rm -f originalData.json
+        else
+          array=($(echo "$accounts_ondemand" | tr ',' '\n'))
+          echo "array=$(echo ${array[@]})" >> $GITHUB_OUTPUT
+          json="["
+          for i in ${!array[@]}; do
+            json=$json"{\"the_id\":\""${array[i]}"\"},"
+          done
+          json=${json%,}
+          json=$json"]"
+          echo 'IDs<<EOF' >> $GITHUB_OUTPUT
+          echo $json >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+        fi
+  # ------------------------
+
+  # deploy a container for the job
+  wasabi:
+    name: Run container
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    needs:
+      - DefineMatrix
+    strategy:
+      matrix:
+        account: ${{ fromJSON(needs.DefineMatrix.outputs.accounts) }}
+    steps:
+    #- name: Get IP information
+    #  run: |
+    #    IP=$(curl -s https://api.ipify.org)
+    #    echo "The current IP is: $IP"
+#
+    #- name: Get Internet Provider information
+    #  run: |
+    #    provider_info=$(curl https://ipapi.co/$IP/json/)
+    #    echo "The Internet Provider information is: $provider_info"
+
+    - name: Set Secrets
+      id: sets-secrets
+      run: |
+        echo ${{ matrix.account.the_id }}
+        echo $(echo ${{ secrets.MATRIX }} | base64 --decode) > originalData.json
+        the_user=$(jq '.[] | select(.id=="${{ matrix.account.the_id }}") | .user' originalData.json)
+        the_pass=$(jq '.[] | select(.id=="${{ matrix.account.the_id }}") | .pass' originalData.json)
+        the_location=$(jq '.[] | select(.id=="${{ matrix.account.the_id }}") | .location' originalData.json)
+        echo "::add-mask::$the_user"
+        echo "::add-mask::$the_pass"
+        echo "secret-user=$the_user" >> $GITHUB_OUTPUT
+        echo "secret-pass=$the_pass" >> $GITHUB_OUTPUT
+        echo "location=$the_location" >> $GITHUB_OUTPUT
+        rm -f originalData.json
+        unset the_user
+        unset the_pass
+
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    # Note: Azure/login action also supports OIDC login mechanism. 
+    # Refer https://github.com/azure/login#configure-a-service-principal-with-a-federated-credential-to-use-oidc-based-authentication for more details.
+
+    ##for subnet integration add --subnet ${{ inputs.subnet_id }}
+    - name: Create container
+      run: |
+        az container create \
+          --resource-group rg-${{ steps.sets-secrets.outputs.location }} \
+          --name ${{ env.ACI_PREFIX }}-${{ github.run_id }}-${{ matrix.account.the_id }} \
+          --cpu 1 --memory 1 \
+          --image ${{ secrets.CONTAINER_IMAGE }} \
+          --registry-login-server ghcr.io \
+          --registry-username ${{ secrets.CONTAINER_USER }} \
+          --registry-password ${{ secrets.CONTAINER_PASS }}\
+          --restart-policy Never \
+          --environment-variables \
+            GPG_PASSPHRASE=${{ secrets.GPG_PASSPHRASE }} \
+            GOOGLE_SHEETS_CREDENTIALS_B64=${{ secrets.GOOGLE_SHEETS_CREDENTIALS_B64 }} \
+            GOOGLE_SHEETS_TOKEN_B64=${{ secrets.GOOGLE_SHEETS_TOKEN_B64 }} \
+            GOOGLE_SHEETS_SHEET_ID=${{ secrets.GOOGLE_SHEETS_SHEET_ID }} \
+            GOOGLE_SHEETS_TAB_NAME=${{ secrets.GOOGLE_SHEETS_TAB_NAME }} \
+            USER=${{ steps.sets-secrets.outputs.secret-user }} \
+            PASS=${{ steps.sets-secrets.outputs.secret-pass }}
+            
+            #TELEGRAM_API_TOKEN=${{ secrets.TELEGRAM_API_TOKEN }} \
+            #TELEGRAM_USERID=${{ secrets.TELEGRAM_USERID }} \
+
+    - name: Wait for container to complete
+      run: |
+        az container show \
+          --resource-group rg-${{ steps.sets-secrets.outputs.location }} \
+          --name ${{ env.ACI_PREFIX }}-${{ github.run_id }}-${{ matrix.account.the_id }} \
+          --query instanceView.state
+        state=$(az container show --name ${{ env.ACI_PREFIX }}-${{ github.run_id }}-${{ matrix.account.the_id }} --resource-group rg-${{ steps.sets-secrets.outputs.location }} --query containers[0].instanceView.currentState.state | tr -d '"')
+        while [ "$state" != "Terminated" ]; do
+            echo $state
+            sleep 60
+            state=$(az container show --name ${{ env.ACI_PREFIX }}-${{ github.run_id }}-${{ matrix.account.the_id }} --resource-group rg-${{ steps.sets-secrets.outputs.location }} --query containers[0].instanceView.currentState.state | tr -d '"')
+        done
+        echo "Il container è terminato"
+
+    #- name: Get container logs
+    #  run: |
+    #    az container logs \
+    #      --resource-group rg-${{ steps.sets-secrets.outputs.location }} \
+    #      --name ${{ env.ACI_PREFIX }}-${{ github.run_id }}-${{ matrix.account.the_id }} \
+    #      --output json
+
+    - name: Delete container
+      run: |
+        az container delete \
+          --resource-group rg-${{ steps.sets-secrets.outputs.location }} \
+          --name ${{ env.ACI_PREFIX }}-${{ github.run_id }}-${{ matrix.account.the_id }} \
+          --yes
+
+  notify:
+    name: Notify
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    needs:
+      - wasabi
+    steps:
+    - name: Notify to Telegram
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_USERID }}
+        token: ${{ secrets.TELEGRAM_API_TOKEN }}
+        message: |
+          Job for account Az __affinity__ - __account__ was executed!
