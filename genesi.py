@@ -21,8 +21,8 @@ data = json.loads(ACCOUNTS)
 
 message = "Jobs will start tomorrow at:\n"
 # set in CET
-startHours = 5
-endHours = 7
+startHours = 7
+endHours = 9
 
 for item in data:
     print("ID: "        , item["id"])
