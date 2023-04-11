@@ -112,16 +112,12 @@ for item in data:
         repo.create_secret("MATRIX"                         , os.environ['MATRIX'])
         repo.create_secret("AZURE_CREDENTIALS"              , os.environ['AZURE_CREDENTIALS'])
         print(f"Secret set correctly in the repository {REPO_NAME}.")
-        print("----------------------------------------------------")
 
         # Abilita le Actions nel repository
 
         # Sostituisci con i tuoi dati
         personal_access_token = item["token"]
         owner = item["account"]
-
-        # Costruisci l'URL dell'API REST di GitHub
-        url = f"https://api.github.com/repos/{owner}/{REPO_NAME}/actions/enable"
 
         # Aggiungi l'autorizzazione con il token di accesso personale
         headers = {
@@ -137,6 +133,33 @@ for item in data:
             print("Le Actions sono state abilitate con successo nel repository.")
         else:
             print(f"Si è verificato un errore durante l'abilitazione delle Actions. Codice di stato: {response.status_code}")
+
+        # Costruisci l'URL dell'API REST di GitHub
+        url = f"https://api.github.com/repos/{owner}/{REPO_NAME}/actions/permissions"
+
+        # Costruisci il payload della richiesta
+        payload = {
+            "enabled": True,
+            "allowed_actions": "all"
+        }
+
+        # Aggiungi gli header richiesti
+        headers = {
+            "Accept": "application/vnd.github+json",
+            "Authorization": f"token {personal_access_token}",
+            "X-GitHub-Api-Version": "2022-11-28"
+        }
+
+        # Esegui la richiesta HTTP PUT per abilitare le Actions nel repository
+        response = requests.put(url, json=payload, headers=headers)
+
+        # Verifica la risposta
+        if response.status_code == 200:
+            print("Le Actions sono state abilitate con successo nel repository.")
+        else:
+            print(f"Si è verificato un errore durante l'abilitazione delle Actions. Codice di stato: {response.status_code}")
+        
+        print("----------------------------------------------------")
 
     except Exception as e:
         # If an error occurs, add the error message to the message string
