@@ -138,7 +138,7 @@ for item in data:
         response = requests.put(url, json=payload, headers=headers)
 
         # Verifica la risposta
-        if response.status_code == 200:
+        if response.status_code == 204:
             print("Le Actions sono state abilitate con successo nel repository.")
         else:
             print(f"Si è verificato un errore durante l'abilitazione delle Actions. Codice di stato: {response.status_code}")
