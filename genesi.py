@@ -113,6 +113,9 @@ for item in data:
         repo.create_secret("AZURE_CREDENTIALS"              , os.environ['AZURE_CREDENTIALS'])
         print(f"Secret set correctly in the repository {REPO_NAME}.")
         print("----------------------------------------------------")
+
+        # Abilita le Actions nel repository
+        repo.enable_actions()
     except Exception as e:
         # If an error occurs, add the error message to the message string
         message = message + f"{str(item['id']).zfill(3)} - {item['account']} - Error: {str(e)}\n"
