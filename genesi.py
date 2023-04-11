@@ -115,7 +115,29 @@ for item in data:
         print("----------------------------------------------------")
 
         # Abilita le Actions nel repository
-        repo.enable_actions()
+
+        # Sostituisci con i tuoi dati
+        personal_access_token = item["token"]
+        owner = item["account"]
+
+        # Costruisci l'URL dell'API REST di GitHub
+        url = f"https://api.github.com/repos/{owner}/{REPO_NAME}/actions/enable"
+
+        # Aggiungi l'autorizzazione con il token di accesso personale
+        headers = {
+            "Authorization": f"token {personal_access_token}",
+            "Accept": "application/vnd.github+json"
+        }
+
+        # Esegui la richiesta HTTP POST per abilitare le Actions nel repository
+        response = requests.post(url, headers=headers)
+
+        # Verifica la risposta
+        if response.status_code == 204:
+            print("Le Actions sono state abilitate con successo nel repository.")
+        else:
+            print(f"Si è verificato un errore durante l'abilitazione delle Actions. Codice di stato: {response.status_code}")
+
     except Exception as e:
         # If an error occurs, add the error message to the message string
         message = message + f"{str(item['id']).zfill(3)} - {item['account']} - Error: {str(e)}\n"
