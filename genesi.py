@@ -23,6 +23,7 @@ message = "Jobs will start tomorrow at:\n"
 # set in CET
 startHours = 7
 endHours = 9
+array_messages = []
 
 for item in data:
     print("ID: "        , item["id"])
@@ -52,8 +53,8 @@ for item in data:
         cron = f"{minute} {hour-2} * * *"
 
         #message = message + f"{hour}:{minute} for {item['id']} - {item['account']}\n"
-        message = message + f"{str(hour).zfill(2)}:{str(minute).zfill(2)} for {str(item['id']).zfill(3)} - {item['account']}\n"
-
+        #message = message + f"{str(hour).zfill(2)}:{str(minute).zfill(2)} for {str(item['id']).zfill(3)} - {item['account']}\n"
+        array_messages.append(f"{str(hour).zfill(2)}:{str(minute).zfill(2)} for {str(item['id']).zfill(3)} - {item['account']}\n")
         repo = g.get_user().create_repo(REPO_NAME)
         print(f"Repository {REPO_NAME} creata correttamente")
 
@@ -147,8 +148,13 @@ for item in data:
 
     except Exception as e:
         # If an error occurs, add the error message to the message string
-        message = message + f"{str(item['id']).zfill(3)} - {item['account']} - Error: {str(e)}\n"
+        # message = message + f"{str(item['id']).zfill(3)} - {item['account']} - Error: {str(e)}\n"
+        array_messages.append(f"ERRORE: {str(item['id']).zfill(3)} - {item['account']} - Error: {str(e)}\n")
         continue
+
+array_messages.sort()
+messages_concat = ''.join(array_messages)
+message = message + messages_concat
 
 # Send notification to telegram
 print("Send notification to telegram")
