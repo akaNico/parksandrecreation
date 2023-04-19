@@ -5,7 +5,7 @@ import random
 import os
 import base64
 import json
-import datetime, timedelta
+import datetime
 import pytz
 import sys
 
