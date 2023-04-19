@@ -5,7 +5,7 @@ import random
 import os
 import base64
 import json
-from datetime import datetime, timedelta
+import datetime, timedelta
 import pytz
 import sys
 
@@ -41,7 +41,7 @@ data = json.loads(ACCOUNTS)
 message = "Jobs will start at:\n"
 
 # ottieni la data e l'ora corrente
-now = datetime.now(pytz.timezone('CET'))
+now = datetime.datetime.now(pytz.timezone('CET'))
 
 # aggiungi un'ora
 future_time = now + datetime.timedelta(hours=1, minutes=0)
