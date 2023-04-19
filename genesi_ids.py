@@ -41,7 +41,7 @@ data = json.loads(ACCOUNTS)
 message = "Jobs will start at:\n"
 
 # ottieni la data e l'ora corrente
-now = datetime.datetime.now(pytz.timezone('CET'))
+now = datetime.now(pytz.timezone('CET'))
 
 # aggiungi un'ora
 future_time = now + datetime.timedelta(hours=1, minutes=0)
