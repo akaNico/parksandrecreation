@@ -64,7 +64,7 @@ for item in data:
 
     print(f'Creating for id {item["id"]}')
 
-    sys.exit()
+    continue
     try:
         # Instantiate the Github object using the access token
         g = Github(item["token"])
