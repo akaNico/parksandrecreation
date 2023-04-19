@@ -1,4 +1,4 @@
-name: Creation
+name: Creation Ids
 
 on:
   workflow_dispatch:
