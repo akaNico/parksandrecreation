@@ -60,6 +60,16 @@ for item in data:
     print("Account: "   , item["account"])
     #print("Token: "    , item["token"])
 
+    username = item["account"]
+    id = item["id"]
+
+    url = f"https://www.github.com/{username}"
+    response = requests.get(url)
+    
+    if response.status_code == 404:
+        array_messages.append(f"DISABLED {id} {username}")
+        continue
+
     if item["id"] not in ids_array:
         print(f'{item["id"]} skipped')
         continue
