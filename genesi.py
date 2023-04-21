@@ -5,8 +5,23 @@ import random
 import os
 import base64
 import json
+import datetime
+import pytz
+import sys
 #do "pip install PyGithub"
 from github import Github
+
+accounts_ondemand_value = None
+for i, arg in enumerate(sys.argv):
+    if arg == '--accounts_ondemand' and len(sys.argv) > i+1:
+        accounts_ondemand_value = sys.argv[i+1]
+        break
+
+ids_array=[]
+# Usa il valore del parametro "accounts_ondemand_value"
+if accounts_ondemand_value is not None:
+    print(f"Il valore del parametro 'accounts_ondemand' è: {accounts_ondemand_value}")
+    ids_array=accounts_ondemand_value.split(",")
 
 # Set the path of the folder to upload to the repository
 FOLDER_PATH = "habanero"
@@ -39,6 +54,12 @@ for item in data:
     if response.status_code == 404:
         array_messages.append(f"DISABLED {id} {username}")
         continue
+
+    if len(ids_array) > 0 and item["id"] not in ids_array:
+        print(f'{item["id"]} skipped')
+        continue
+
+    print(f'Creating for id {item["id"]}')
 
     try:
         # Instantiate the Github object using the access token
