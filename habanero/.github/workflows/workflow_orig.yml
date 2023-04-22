@@ -84,6 +84,14 @@ jobs:
         registry: ghcr.io
         username: ${{ secrets.CONTAINER_USER }}
         password: ${{ secrets.CONTAINER_PASS }}
+    
+    - name: Starting
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_USERID }}
+        token: ${{ secrets.TELEGRAM_API_TOKEN }}
+        message: |
+          Job for account __affinity__ - __account__ starting!
 
     - name: Run the Docker container
       run: |
