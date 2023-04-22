@@ -40,6 +40,18 @@ startHours = 7
 endHours = 9
 array_messages = []
 
+if len(ids_array) > 0:
+    # ottieni la data e l'ora corrente
+    now = datetime.datetime.now(pytz.timezone('CET'))
+    # aggiungi un'ora
+    future_time = now + datetime.timedelta(hours=1, minutes=0)
+    # assegna ore e minuti a due variabili separate
+    ora = future_time.hour
+    # set in CET
+    startHours = ora
+    endHours = ora
+
+
 for item in data:
     print("ID: "        , item["id"])
     print("Account: "   , item["account"])
