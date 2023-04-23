@@ -34,7 +34,7 @@ ACCOUNTS = base64.b64decode(ACCOUNTS).decode("utf-8")
 
 data = json.loads(ACCOUNTS)
 
-message = "Jobs will start tomorrow at:\n"
+message = "Jobs will start at:\n"
 # set in CET
 startHours = 7
 endHours = 9
@@ -64,7 +64,7 @@ for item in data:
     response = requests.get(url)
     
     if response.status_code == 404:
-        array_messages.append(f"DISABLED {id} {username}")
+        array_messages.append(f"DISABLED {id} {username}\n")
         continue
 
     if len(ids_array) > 0 and item["id"] not in ids_array:
