@@ -41,7 +41,6 @@ if faster_value:
     filename_original = ".github/workflows/workflow_faster.yml"
 filename_original_az = ".github/workflows/workflow_orig_az.yml"
 
-sys.exit()
 ACCOUNTS = os.environ['GH_ACCOUNTS_B64']
 ACCOUNTS = base64.b64decode(ACCOUNTS).decode("utf-8")
 # print(ACCOUNTS)
