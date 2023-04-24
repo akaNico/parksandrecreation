@@ -422,163 +422,176 @@ def RewardsLogin(browser: WebDriver):
     handleFirstVisit(browser)
 
 
-@func_set_timeout(300)
 def checkBingLogin(browser: WebDriver, isMobile: bool = False):
-    """Check if logged in to Bing"""
 
-    def getEmailPass():
-        for account in ACCOUNTS:
-            if account["username"] == CURRENT_ACCOUNT:
-                return account["username"], account["password"], account.get("totpSecret", None)
+    @func_set_timeout(50)
+    def checkBingLoginTimedOut(browser: WebDriver, isMobile: bool = False):
+        """Check if logged in to Bing"""
+        print('[LOGIN]', 'Check if logged in to Bing')
 
-    def loginAgain():
-        waitUntilVisible(browser, By.ID, 'loginHeader', 10)
-        print('[LOGIN]', 'Writing email...')
-        email, pwd, totpSecret = getEmailPass()
-        browser.find_element(By.NAME, "loginfmt").send_keys(email)
-        browser.find_element(By.ID, 'idSIButton9').click()
-        time.sleep(calculateSleep(5))
-        waitUntilVisible(browser, By.ID, 'loginHeader', 10)
-        browser.find_element(By.ID, "i0118").send_keys(pwd)
-        print('[LOGIN]', 'Writing password...')
-        browser.find_element(By.ID, 'idSIButton9').click()
-        time.sleep(5)
-        # Enter TOTP code if needed
-        if isElementExists(browser, By.ID, 'idTxtBx_SAOTCC_OTC'):
-            if totpSecret is not None:
-                # Enter TOTP code
-                totpCode = pyotp.TOTP(totpSecret).now()
-                browser.find_element(
-                    By.ID, "idTxtBx_SAOTCC_OTC").send_keys(totpCode)
-                print('[LOGIN]', 'Writing TOTP code...')
-                # Click submit
-                browser.find_element(By.ID, 'idSubmit_SAOTCC_Continue').click()
-            else:
-                print('[LOGIN]', 'TOTP code required but no secret was provided.')
-            # Wait 5 seconds
+        def getEmailPass():
+            for account in ACCOUNTS:
+                if account["username"] == CURRENT_ACCOUNT:
+                    return account["username"], account["password"], account.get("totpSecret", None)
+
+        def loginAgain():
+            waitUntilVisible(browser, By.ID, 'loginHeader', 10)
+            print('[LOGIN]', 'Writing email...')
+            email, pwd, totpSecret = getEmailPass()
+            browser.find_element(By.NAME, "loginfmt").send_keys(email)
+            browser.find_element(By.ID, 'idSIButton9').click()
+            time.sleep(calculateSleep(5))
+            waitUntilVisible(browser, By.ID, 'loginHeader', 10)
+            browser.find_element(By.ID, "i0118").send_keys(pwd)
+            print('[LOGIN]', 'Writing password...')
+            browser.find_element(By.ID, 'idSIButton9').click()
             time.sleep(5)
+            # Enter TOTP code if needed
             if isElementExists(browser, By.ID, 'idTxtBx_SAOTCC_OTC'):
-                raise TOTPInvalidException
-        if isElementExists(browser, By.ID, "idSIButton9"):
-            if ARGS.session:
-                # Click Yes to stay signed in.
-                browser.find_element(By.ID, 'idSIButton9').click()
-            else:
-                # Click No.
-                browser.find_element(By.ID, 'idBtn_Back').click()
-        goToURL(browser, "https://bing.com/")
+                if totpSecret is not None:
+                    # Enter TOTP code
+                    totpCode = pyotp.TOTP(totpSecret).now()
+                    browser.find_element(
+                        By.ID, "idTxtBx_SAOTCC_OTC").send_keys(totpCode)
+                    print('[LOGIN]', 'Writing TOTP code...')
+                    # Click submit
+                    browser.find_element(
+                        By.ID, 'idSubmit_SAOTCC_Continue').click()
+                else:
+                    print(
+                        '[LOGIN]', 'TOTP code required but no secret was provided.')
+                # Wait 5 seconds
+                time.sleep(5)
+                if isElementExists(browser, By.ID, 'idTxtBx_SAOTCC_OTC'):
+                    raise TOTPInvalidException
+            if isElementExists(browser, By.ID, "idSIButton9"):
+                if ARGS.session:
+                    # Click Yes to stay signed in.
+                    browser.find_element(By.ID, 'idSIButton9').click()
+                else:
+                    # Click No.
+                    browser.find_element(By.ID, 'idBtn_Back').click()
+            goToURL(browser, "https://bing.com/")
 
-    global POINTS_COUNTER  # pylint: disable=global-statement
-    goToURL(browser, 'https://bing.com/')
-    time.sleep(calculateSleep(15))
-    # try to get points at first if account already logged in
-    if ARGS.session:
+        global POINTS_COUNTER  # pylint: disable=global-statement
+        goToURL(browser, 'https://bing.com/')
+        time.sleep(calculateSleep(15))
+        # try to get points at first if account already logged in
+        if ARGS.session:
+            try:
+                if not isMobile:
+                    try:
+                        POINTS_COUNTER = int(browser.find_element(
+                            By.ID, 'id_rc').get_attribute('innerHTML'))
+                    except ValueError:
+                        if browser.find_element(By.ID, 'id_s').is_displayed():
+                            browser.find_element(By.ID, 'id_s').click()
+                            time.sleep(calculateSleep(15))
+                            checkBingLogin(browser, isMobile)
+                        time.sleep(2)
+                        POINTS_COUNTER = int(
+                            browser.find_element(By.ID, "id_rc").get_attribute("innerHTML").replace(",", ""))
+                else:
+                    browser.find_element(By.ID, 'mHamburger').click()
+                    time.sleep(1)
+                    POINTS_COUNTER = int(browser.find_element(
+                        By.ID, 'fly_id_rc').get_attribute('innerHTML'))
+            except:
+                pass
+            else:
+                return None
+        # Accept Cookies
+        try:
+            browser.find_element(By.ID, 'bnp_btn_accept').click()
+        except:
+            pass
+        if isMobile:
+            # close bing app banner
+            if isElementExists(browser, By.ID, 'bnp_rich_div'):
+                try:
+                    browser.find_element(
+                        By.XPATH, '//*[@id="bnp_bop_close_icon"]/img').click()
+                except NoSuchElementException:
+                    pass
+            try:
+                time.sleep(1)
+                browser.find_element(By.ID, 'mHamburger').click()
+            except:
+                try:
+                    browser.find_element(By.ID, 'bnp_btn_accept').click()
+                except:
+                    pass
+                time.sleep(1)
+                if isElementExists(browser, By.XPATH, '//*[@id="bnp_ttc_div"]/div[1]/div[2]/span'):
+                    browser.execute_script("""var element = document.evaluate('/html/body/div[1]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+                                            element.remove();""")
+                    time.sleep(5)
+                time.sleep(1)
+                try:
+                    browser.find_element(By.ID, 'mHamburger').click()
+                except:
+                    pass
+            try:
+                time.sleep(1)
+                browser.find_element(By.ID, 'HBSignIn').click()
+                if isElementExists(browser, By.NAME, "loginfmt"):
+                    loginAgain()
+            except:
+                pass
+            try:
+                time.sleep(2)
+                browser.find_element(By.ID, 'iShowSkip').click()
+                time.sleep(3)
+            except:
+                if browser.title == "Help us protect your account" or browser.current_url.startswith(
+                        "https://account.live.com/proofs/Add"):
+                    handleUnusualActivity(browser, isMobile)
+        # Wait 5 seconds
+        time.sleep(5)
+        # Refresh page
+        goToURL(browser, 'https://bing.com/')
+        # Wait 15 seconds
+        time.sleep(calculateSleep(15))
+        # Update Counter
         try:
             if not isMobile:
                 try:
                     POINTS_COUNTER = int(browser.find_element(
                         By.ID, 'id_rc').get_attribute('innerHTML'))
-                except ValueError:
+                except:
                     if browser.find_element(By.ID, 'id_s').is_displayed():
                         browser.find_element(By.ID, 'id_s').click()
                         time.sleep(calculateSleep(15))
+
                         checkBingLogin(browser, isMobile)
-                    time.sleep(2)
-                    POINTS_COUNTER = int(
-                        browser.find_element(By.ID, "id_rc").get_attribute("innerHTML").replace(",", ""))
+                    time.sleep(5)
+                    POINTS_COUNTER = int(browser.find_element(
+                        By.ID, "id_rc").get_attribute("innerHTML").replace(",", ""))
             else:
-                browser.find_element(By.ID, 'mHamburger').click()
+                try:
+                    browser.find_element(By.ID, 'mHamburger').click()
+                except:
+                    try:
+                        browser.find_element(By.ID, 'bnp_close_link').click()
+                        time.sleep(4)
+                        browser.find_element(By.ID, 'bnp_btn_accept').click()
+                    except:
+                        pass
+                    time.sleep(1)
+                    browser.find_element(By.ID, 'mHamburger').click()
                 time.sleep(1)
                 POINTS_COUNTER = int(browser.find_element(
                     By.ID, 'fly_id_rc').get_attribute('innerHTML'))
         except:
-            pass
-        else:
-            return None
-    # Accept Cookies
-    try:
-        browser.find_element(By.ID, 'bnp_btn_accept').click()
-    except:
-        pass
-    if isMobile:
-        # close bing app banner
-        if isElementExists(browser, By.ID, 'bnp_rich_div'):
-            try:
-                browser.find_element(
-                    By.XPATH, '//*[@id="bnp_bop_close_icon"]/img').click()
-            except NoSuchElementException:
-                pass
-        try:
-            time.sleep(1)
-            browser.find_element(By.ID, 'mHamburger').click()
-        except:
-            try:
-                browser.find_element(By.ID, 'bnp_btn_accept').click()
-            except:
-                pass
-            time.sleep(1)
-            if isElementExists(browser, By.XPATH, '//*[@id="bnp_ttc_div"]/div[1]/div[2]/span'):
-                browser.execute_script("""var element = document.evaluate('/html/body/div[1]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-                                        element.remove();""")
-                time.sleep(5)
-            time.sleep(1)
-            try:
-                browser.find_element(By.ID, 'mHamburger').click()
-            except:
-                pass
-        try:
-            time.sleep(1)
-            browser.find_element(By.ID, 'HBSignIn').click()
-            if isElementExists(browser, By.NAME, "loginfmt"):
-                loginAgain()
-        except:
-            pass
-        try:
-            time.sleep(2)
-            browser.find_element(By.ID, 'iShowSkip').click()
-            time.sleep(3)
-        except:
-            if browser.title == "Help us protect your account" or browser.current_url.startswith(
-                    "https://account.live.com/proofs/Add"):
-                handleUnusualActivity(browser, isMobile)
-    # Wait 5 seconds
-    time.sleep(5)
-    # Refresh page
-    goToURL(browser, 'https://bing.com/')
-    # Wait 15 seconds
-    time.sleep(calculateSleep(15))
-    # Update Counter
-    try:
-        if not isMobile:
-            try:
-                POINTS_COUNTER = int(browser.find_element(
-                    By.ID, 'id_rc').get_attribute('innerHTML'))
-            except:
-                if browser.find_element(By.ID, 'id_s').is_displayed():
-                    browser.find_element(By.ID, 'id_s').click()
-                    time.sleep(calculateSleep(15))
+            checkBingLoginTimedOut(browser, isMobile)
 
-                    checkBingLogin(browser, isMobile)
-                time.sleep(5)
-                POINTS_COUNTER = int(browser.find_element(
-                    By.ID, "id_rc").get_attribute("innerHTML").replace(",", ""))
-        else:
-            try:
-                browser.find_element(By.ID, 'mHamburger').click()
-            except:
-                try:
-                    browser.find_element(By.ID, 'bnp_close_link').click()
-                    time.sleep(4)
-                    browser.find_element(By.ID, 'bnp_btn_accept').click()
-                except:
-                    pass
-                time.sleep(1)
-                browser.find_element(By.ID, 'mHamburger').click()
-            time.sleep(1)
-            POINTS_COUNTER = int(browser.find_element(
-                By.ID, 'fly_id_rc').get_attribute('innerHTML'))
-    except:
-        checkBingLogin(browser, isMobile)
+    try:
+        checkBingLoginTimedOut(browser, isMobile)
+    except FunctionTimedOut:
+        prYellow("[WARN] Bing login checking timed out!")
+        LOGS[CURRENT_ACCOUNT]['Last check'] = 'Unusual activity detected !'
+        FINISHED_ACCOUNTS.append(CURRENT_ACCOUNT)
+        return
 
 
 def handleUnusualActivity(browser: WebDriver, isMobile: bool = False):
@@ -2175,6 +2188,11 @@ def logOnGoogleSpreadsheet():
 
         for index, value in enumerate(LOGS.items(), 1):
             redeem_message = ''
+            new_points = None
+            total_points = None
+            redeem_title = None
+            redeem_price = None
+            redeem_count = None
             if value[1].get("Redeem goal title", None):
                 redeem_title = value[1].get("Redeem goal title", None)
                 redeem_price = value[1].get("Redeem goal price")
@@ -2221,10 +2239,10 @@ def logOnGoogleSpreadsheet():
                     [
                         f"{current_time}",  # run_time
                         value[0],  # email
-                        new_points,  # earned_today
+                        new_points or 0,  # earned_today
                         "",  # earned_today
                         "",  # streak_count
-                        total_points,  # available_points
+                        total_points or 0,  # available_points
                         "",  # lifetime_points
                         status,  # status
                         redeem_title,  # redeem_title
@@ -3079,6 +3097,7 @@ def main():
                     break
             time.sleep(30)
     else:
+        prBlue(f"\n[INFO] Farmer starting now")
         start = time.time()
         if not ARGS.dont_check_for_updates:
             update_handler(version)  # CHECK FOR UPDATES
