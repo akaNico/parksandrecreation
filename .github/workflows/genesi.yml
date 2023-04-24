@@ -44,7 +44,7 @@ jobs:
           MATRIX: ${{ secrets.MATRIX }}
           AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
         run: |
-          python genesi.py --accounts_ondemand ${{ github.event.inputs.accounts_ondemand }} --faster ${{ github.event.inputs.faster }}
+          python genesi.py --accounts_ondemand ${{ github.event.inputs.accounts_ondemand }} --faster
       - name: Run script with only accounts_ondemand
         if: ${{ github.event.inputs.accounts_ondemand && !github.event.inputs.faster }}
         env:
@@ -80,7 +80,7 @@ jobs:
           MATRIX: ${{ secrets.MATRIX }}
           AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
         run: |
-          python genesi.py --faster ${{ github.event.inputs.faster }}
+          python genesi.py --faster
       - name: Run script without parameters
         if: ${{ !github.event.inputs.accounts_ondemand && !github.event.inputs.faster }}
         env:
