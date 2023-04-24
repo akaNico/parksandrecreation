@@ -10,19 +10,21 @@ import pytz
 import sys
 # do "pip install PyGithub"
 from github import Github
+import argparse
+
+parser = argparse.ArgumentParser(description='Parse parameters')
+parser.add_argument('--accounts_ondemand', type=str,
+                    help='A comma-separated list of integers')
+parser.add_argument('--faster', action='store_true', help='A boolean flag')
+args = parser.parse_args()
 
 accounts_ondemand_value = None
-for i, arg in enumerate(sys.argv):
-    if arg == '--accounts_ondemand' and len(sys.argv) > i+1:
-        accounts_ondemand_value = sys.argv[i+1]
-        break
+if args.accounts_ondemand:
+    accounts_ondemand_value = args.accounts_ondemand
 
 faster_value = None
-for i, arg in enumerate(sys.argv):
-    if arg == '--faster' and len(sys.argv) > i+1:
-        faster_value = sys.argv[i+1]
-        break
-
+if args.faster:
+    faster_value = args.faster
 
 ids_array = []
 # Usa il valore del parametro "accounts_ondemand_value"
