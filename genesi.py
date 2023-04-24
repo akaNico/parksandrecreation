@@ -14,9 +14,9 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Parse parameters')
 parser.add_argument('--accounts_ondemand', type=str,
-                    help='A comma-separated list of integers')
-parser.add_argument('--faster', type=str,
-                    help='If contains value it will use faster script')
+                    help='A comma-separated list of integers', default='')
+parser.add_argument('--faster', action='store_true',
+                    help='A boolean flag', default=False)
 args = parser.parse_args()
 
 accounts_ondemand_value = None
@@ -41,6 +41,7 @@ if faster_value:
     filename_original = ".github/workflows/workflow_faster.yml"
 filename_original_az = ".github/workflows/workflow_orig_az.yml"
 
+sys.exit()
 ACCOUNTS = os.environ['GH_ACCOUNTS_B64']
 ACCOUNTS = base64.b64decode(ACCOUNTS).decode("utf-8")
 # print(ACCOUNTS)
