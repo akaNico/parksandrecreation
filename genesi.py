@@ -15,7 +15,8 @@ import argparse
 parser = argparse.ArgumentParser(description='Parse parameters')
 parser.add_argument('--accounts_ondemand', type=str,
                     help='A comma-separated list of integers')
-parser.add_argument('--faster', action='store_true', help='A boolean flag')
+parser.add_argument('--faster', type=str,
+                    help='If contains value it will use faster script')
 args = parser.parse_args()
 
 accounts_ondemand_value = None
