@@ -28,6 +28,7 @@ jobs:
           pip install pytz
           pip install argparse
       - name: Run script
+        if: ${{ github.event.inputs.accounts_ondemand && github.event.inputs.faster }}
         env:
           GH_ACCOUNTS_B64: ${{ secrets.GH_ACCOUNTS_B64 }}
           GOOGLE_SHEETS_TAB_NAME: ${{ secrets.GOOGLE_SHEETS_TAB_NAME }}
@@ -44,3 +45,57 @@ jobs:
           AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
         run: |
           python genesi.py --accounts_ondemand ${{ github.event.inputs.accounts_ondemand }} --faster ${{ github.event.inputs.faster }}
+      - name: Run script with only accounts_ondemand
+        if: ${{ github.event.inputs.accounts_ondemand && !github.event.inputs.faster }}
+        env:
+          GH_ACCOUNTS_B64: ${{ secrets.GH_ACCOUNTS_B64 }}
+          GOOGLE_SHEETS_TAB_NAME: ${{ secrets.GOOGLE_SHEETS_TAB_NAME }}
+          GOOGLE_SHEETS_TOKEN_B64: ${{ secrets.GOOGLE_SHEETS_TOKEN_B64 }}
+          GOOGLE_SHEETS_SHEET_ID: ${{ secrets.GOOGLE_SHEETS_SHEET_ID }}
+          GOOGLE_SHEETS_CREDENTIALS_B64: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS_B64 }}
+          TELEGRAM_API_TOKEN: ${{ secrets.TELEGRAM_API_TOKEN }}
+          TELEGRAM_USERID: ${{ secrets.TELEGRAM_USERID }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          CONTAINER_IMAGE: ${{ secrets.CONTAINER_IMAGE }}
+          CONTAINER_USER: ${{ secrets.CONTAINER_USER }}
+          CONTAINER_PASS: ${{ secrets.CONTAINER_PASS }}
+          MATRIX: ${{ secrets.MATRIX }}
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+        run: |
+          python genesi.py --accounts_ondemand ${{ github.event.inputs.accounts_ondemand }}
+      - name: Run script with only faster
+        if: ${{ !github.event.inputs.accounts_ondemand && github.event.inputs.faster }}
+        env:
+          GH_ACCOUNTS_B64: ${{ secrets.GH_ACCOUNTS_B64 }}
+          GOOGLE_SHEETS_TAB_NAME: ${{ secrets.GOOGLE_SHEETS_TAB_NAME }}
+          GOOGLE_SHEETS_TOKEN_B64: ${{ secrets.GOOGLE_SHEETS_TOKEN_B64 }}
+          GOOGLE_SHEETS_SHEET_ID: ${{ secrets.GOOGLE_SHEETS_SHEET_ID }}
+          GOOGLE_SHEETS_CREDENTIALS_B64: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS_B64 }}
+          TELEGRAM_API_TOKEN: ${{ secrets.TELEGRAM_API_TOKEN }}
+          TELEGRAM_USERID: ${{ secrets.TELEGRAM_USERID }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          CONTAINER_IMAGE: ${{ secrets.CONTAINER_IMAGE }}
+          CONTAINER_USER: ${{ secrets.CONTAINER_USER }}
+          CONTAINER_PASS: ${{ secrets.CONTAINER_PASS }}
+          MATRIX: ${{ secrets.MATRIX }}
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+        run: |
+          python genesi.py --faster ${{ github.event.inputs.faster }}
+      - name: Run script without parameters
+        if: ${{ !github.event.inputs.accounts_ondemand && !github.event.inputs.faster }}
+        env:
+          GH_ACCOUNTS_B64: ${{ secrets.GH_ACCOUNTS_B64 }}
+          GOOGLE_SHEETS_TAB_NAME: ${{ secrets.GOOGLE_SHEETS_TAB_NAME }}
+          GOOGLE_SHEETS_TOKEN_B64: ${{ secrets.GOOGLE_SHEETS_TOKEN_B64 }}
+          GOOGLE_SHEETS_SHEET_ID: ${{ secrets.GOOGLE_SHEETS_SHEET_ID }}
+          GOOGLE_SHEETS_CREDENTIALS_B64: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS_B64 }}
+          TELEGRAM_API_TOKEN: ${{ secrets.TELEGRAM_API_TOKEN }}
+          TELEGRAM_USERID: ${{ secrets.TELEGRAM_USERID }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          CONTAINER_IMAGE: ${{ secrets.CONTAINER_IMAGE }}
+          CONTAINER_USER: ${{ secrets.CONTAINER_USER }}
+          CONTAINER_PASS: ${{ secrets.CONTAINER_PASS }}
+          MATRIX: ${{ secrets.MATRIX }}
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+        run: |
+          python genesi.py
