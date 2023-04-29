@@ -130,7 +130,7 @@ for item in data:
 
         print('Add files to repository az')
         # set in UTC
-        cron = f"{minute} {hour+4} * * *"
+        cron = f"{minute} {hour} * * *"
         filename_output_az = f".github/workflows/{REPO_NAME}_az.yml"
         with open(os.path.join(FOLDER_PATH, filename_original_az), 'r') as file:
             filedata = file.read()
