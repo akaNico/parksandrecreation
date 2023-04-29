@@ -143,7 +143,16 @@ for item in data:
 
         # Add the files from the folder to the repository
         exclude_list = ["workflow_orig.yml",
-                        ".DS_Store", "workflow_orig_az.yml", "workflow_faster.yml"]
+                        ".DS_Store",
+                        "workflow_orig_az.yml",
+                        "workflow_faster.yml",
+                        "exceptions.py",
+                        "ms_rewards_farmer.py",
+                        "requirements.txt",
+                        "searchwords.txt",
+                        "update.py",
+                        "version.json",
+                        "workflow_orig_az_createrun.yml"]
         for dirname, _, filenames in os.walk(FOLDER_PATH):
             for filename in filenames:
                 if filename in exclude_list:
