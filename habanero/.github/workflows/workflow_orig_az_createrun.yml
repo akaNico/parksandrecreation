@@ -19,6 +19,13 @@ jobs:
     outputs:
       accounts: ${{ steps.get-accounts.outputs.IDs }}
     steps:
+    - name: Notify to Telegram
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_USERID }}
+        token: ${{ secrets.TELEGRAM_API_TOKEN }}
+        message: |
+          Job for account Az __affinity__ - __account__ is starting!
     - name: Get Accounts
       id: get-accounts
       env:
