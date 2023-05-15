@@ -125,6 +125,7 @@ jobs:
             --dont-check-for-updates \
             --dont-check-internet \
             --error \
+            --no-webdriver-manager \
             --on-finish 'exit' \
             --no-images \
             --google-sheet google_sheets_credentials.json google_sheets_token.json ${{ secrets.GOOGLE_SHEETS_SHEET_ID }} ${{ secrets.GOOGLE_SHEETS_TAB_NAME }}
