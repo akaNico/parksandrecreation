@@ -15,7 +15,7 @@ import argparse
 parser = argparse.ArgumentParser(description='Parse parameters')
 parser.add_argument('--accounts_ondemand', type=str,
                     help='A comma-separated list of integers', default='')
-parser.add_argument('--faster', action='store_true',
+parser.add_argument('--old', action='store_true',
                     help='A boolean flag', default=False)
 args = parser.parse_args()
 
@@ -25,7 +25,7 @@ if args.accounts_ondemand:
 
 old_script = None
 if args.old:
-    old_script = args.faster
+    old_script = args.old
 
 ids_array = []
 # Usa il valore del parametro "accounts_ondemand_value"
