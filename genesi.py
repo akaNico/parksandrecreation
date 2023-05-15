@@ -23,9 +23,9 @@ accounts_ondemand_value = None
 if args.accounts_ondemand:
     accounts_ondemand_value = args.accounts_ondemand
 
-faster_value = None
-if args.faster:
-    faster_value = args.faster
+old_script = None
+if args.old:
+    old_script = args.faster
 
 ids_array = []
 # Usa il valore del parametro "accounts_ondemand_value"
@@ -36,9 +36,9 @@ if accounts_ondemand_value is not None:
 
 # Set the path of the folder to upload to the repository
 FOLDER_PATH = "habanero"
-filename_original = ".github/workflows/workflow_orig.yml"
-if faster_value:
-    filename_original = ".github/workflows/workflow_faster.yml"
+filename_original = ".github/workflows/workflow_proxed.yml"
+if old_script:
+    filename_original = ".github/workflows/workflow_orig.yml"
 filename_original_az = ".github/workflows/workflow_orig_az_createrun.yml"
 
 ACCOUNTS = os.environ['GH_ACCOUNTS_B64']
@@ -146,12 +146,7 @@ for item in data:
                         ".DS_Store",
                         "workflow_orig_az.yml",
                         "workflow_faster.yml",
-                        "exceptions.py",
-                        "ms_rewards_farmer.py",
-                        "requirements.txt",
-                        "searchwords.txt",
-                        "update.py",
-                        "version.json",
+                        "workflow_proxed.yml",
                         "workflow_orig_az_createrun.yml"]
         for dirname, _, filenames in os.walk(FOLDER_PATH):
             for filename in filenames:
@@ -186,6 +181,7 @@ for item in data:
         repo.create_secret("CONTAINER_USER", os.environ['CONTAINER_USER'])
         repo.create_secret("CONTAINER_PASS", os.environ['CONTAINER_PASS'])
         repo.create_secret("MATRIX", os.environ['MATRIX'])
+        repo.create_secret("PROXY_LIST_URL", os.environ['PROXY_LIST_URL'])
         repo.create_secret("AZURE_CREDENTIALS",
                            os.environ['AZURE_CREDENTIALS'])
         print(f"Secret set correctly in the repository {REPO_NAME}.")
