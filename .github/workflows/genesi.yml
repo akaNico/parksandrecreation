@@ -5,8 +5,8 @@ on:
     inputs:
       accounts_ondemand:
         description: "Enter the accounts, separated by commas"
-      faster:
-        description: "Enter a value if you want to use fast version"
+      old:
+        description: "Enter a value if you want to use old version"
 
   #schedule:
   #  - cron: "0 19 * * *"
@@ -28,7 +28,7 @@ jobs:
           pip install pytz
           pip install argparse
       - name: Run script
-        if: ${{ github.event.inputs.accounts_ondemand && github.event.inputs.faster }}
+        if: ${{ github.event.inputs.accounts_ondemand && github.event.inputs.old }}
         env:
           GH_ACCOUNTS_B64: ${{ secrets.GH_ACCOUNTS_B64 }}
           GOOGLE_SHEETS_TAB_NAME: ${{ secrets.GOOGLE_SHEETS_TAB_NAME }}
@@ -42,11 +42,12 @@ jobs:
           CONTAINER_USER: ${{ secrets.CONTAINER_USER }}
           CONTAINER_PASS: ${{ secrets.CONTAINER_PASS }}
           MATRIX: ${{ secrets.MATRIX }}
+          PROXY_LIST_URL: ${{ secrets.PROXY_LIST_URL }}
           AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
         run: |
-          python genesi.py --accounts_ondemand ${{ github.event.inputs.accounts_ondemand }} --faster
+          python genesi.py --accounts_ondemand ${{ github.event.inputs.accounts_ondemand }} --old
       - name: Run script with only accounts_ondemand
-        if: ${{ github.event.inputs.accounts_ondemand && !github.event.inputs.faster }}
+        if: ${{ github.event.inputs.accounts_ondemand && !github.event.inputs.old }}
         env:
           GH_ACCOUNTS_B64: ${{ secrets.GH_ACCOUNTS_B64 }}
           GOOGLE_SHEETS_TAB_NAME: ${{ secrets.GOOGLE_SHEETS_TAB_NAME }}
@@ -60,11 +61,12 @@ jobs:
           CONTAINER_USER: ${{ secrets.CONTAINER_USER }}
           CONTAINER_PASS: ${{ secrets.CONTAINER_PASS }}
           MATRIX: ${{ secrets.MATRIX }}
+          PROXY_LIST_URL: ${{ secrets.PROXY_LIST_URL }}
           AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
         run: |
           python genesi.py --accounts_ondemand ${{ github.event.inputs.accounts_ondemand }}
-      - name: Run script with only faster
-        if: ${{ !github.event.inputs.accounts_ondemand && github.event.inputs.faster }}
+      - name: Run script with only old
+        if: ${{ !github.event.inputs.accounts_ondemand && github.event.inputs.old }}
         env:
           GH_ACCOUNTS_B64: ${{ secrets.GH_ACCOUNTS_B64 }}
           GOOGLE_SHEETS_TAB_NAME: ${{ secrets.GOOGLE_SHEETS_TAB_NAME }}
@@ -78,11 +80,12 @@ jobs:
           CONTAINER_USER: ${{ secrets.CONTAINER_USER }}
           CONTAINER_PASS: ${{ secrets.CONTAINER_PASS }}
           MATRIX: ${{ secrets.MATRIX }}
+          PROXY_LIST_URL: ${{ secrets.PROXY_LIST_URL }}
           AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
         run: |
-          python genesi.py --faster
+          python genesi.py --old
       - name: Run script without parameters
-        if: ${{ !github.event.inputs.accounts_ondemand && !github.event.inputs.faster }}
+        if: ${{ !github.event.inputs.accounts_ondemand && !github.event.inputs.old }}
         env:
           GH_ACCOUNTS_B64: ${{ secrets.GH_ACCOUNTS_B64 }}
           GOOGLE_SHEETS_TAB_NAME: ${{ secrets.GOOGLE_SHEETS_TAB_NAME }}
@@ -96,6 +99,7 @@ jobs:
           CONTAINER_USER: ${{ secrets.CONTAINER_USER }}
           CONTAINER_PASS: ${{ secrets.CONTAINER_PASS }}
           MATRIX: ${{ secrets.MATRIX }}
+          PROXY_LIST_URL: ${{ secrets.PROXY_LIST_URL }}
           AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
         run: |
           python genesi.py
