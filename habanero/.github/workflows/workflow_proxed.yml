@@ -21,7 +21,7 @@ jobs:
         to: ${{ secrets.TELEGRAM_USERID }}
         token: ${{ secrets.TELEGRAM_API_TOKEN }}
         message: |
-          Job for account 5 - taneepsilon starting!
+          Job for account __affinity__ - __account__ starting!
     - name: Get Accounts
       id: get-accounts
       env:
@@ -143,4 +143,4 @@ jobs:
         to: ${{ secrets.TELEGRAM_USERID }}
         token: ${{ secrets.TELEGRAM_API_TOKEN }}
         message: |
-          Job for account 5 - taneepsilon was executed!
+          Job for account __affinity__ - __account__ was executed!
