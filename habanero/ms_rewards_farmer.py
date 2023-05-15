@@ -2205,6 +2205,7 @@ def logOnGoogleSpreadsheet():
     redeem_price = ""
     redeem_count = 0
     redeem_message = ""
+    today = date.today().strftime("%d/%m/%Y")
     message = f'📅 Daily report {today}\n\n'
     try:
         service = build("sheets", "v4", credentials=creds)
