@@ -2234,7 +2234,7 @@ def logOnGoogleSpreadsheet():
             body={"values": col_names},
         ).execute()
 
-        for value in enumerate(LOGS.items(), 1):
+        for index, value in enumerate(LOGS.items(), 1):
             redeem_message = ''
             new_points = None
             total_points = None
