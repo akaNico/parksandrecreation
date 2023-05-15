@@ -2762,6 +2762,7 @@ def loadAccounts():
     finally:
         if ARGS.shuffle:
             random.shuffle(ACCOUNTS)
+        prBlue(f"\n[INFO] Accounts found: {len(ACCOUNTS)}")
 
 
 def update_handler(local_version):
@@ -2886,8 +2887,8 @@ def farmer():
             if LOGS[CURRENT_ACCOUNT]["Last check"] != str(date.today()):
                 LOGS[CURRENT_ACCOUNT]["Last check"] = str(date.today())
                 updateLogs()
-            prYellow('********************' +
-                     CURRENT_ACCOUNT + '********************')
+            prYellow('********************-' +
+                     CURRENT_ACCOUNT + '-********************')
             if not LOGS[CURRENT_ACCOUNT]['PC searches']:
                 browser = browserSetup(
                     False,
