@@ -2205,7 +2205,7 @@ def logOnGoogleSpreadsheet():
     redeem_price = ""
     redeem_count = 0
     redeem_message = ""
-
+    message = f'📅 Daily report {today}\n\n'
     try:
         service = build("sheets", "v4", credentials=creds)
         # Call the Sheets API
@@ -2259,26 +2259,45 @@ def logOnGoogleSpreadsheet():
                 total_earned += new_points
                 total_points = value[1]["Points"]
                 total_overall += total_points
+                message += f"{index}. {value[0]}\n📝 Status: {status}\n⭐️ Earned points: {new_points}\n🏅 Total points: {total_points}\n"
+                if redeem_message:
+                    message += redeem_message
+                else:
+                    message += "\n"
             elif value[1]['Last check'] == 'Your account has been suspended':
                 status = '❌ Suspended'
+                message += f"{index}. {value[0]}\n📝 Status: {status}\n\n"
             elif value[1]['Last check'] == 'Your account has been locked !':
                 status = '⚠️ Locked'
+                message += f"{index}. {value[0]}\n📝 Status: {status}\n\n"
             elif value[1]['Last check'] == 'Unusual activity detected !':
                 status = '⚠️ Unusual activity detected'
+                message += f"{index}. {value[0]}\n📝 Status: {status}\n\n"
             elif value[1]['Last check'] == 'Unknown error !':
                 status = '⛔️ Unknown error occurred'
+                message += f"{index}. {value[0]}\n📝 Status: {status}\n\n"
             elif value[1]['Last check'] == 'Your email or password was not valid !':
                 status = '📛 Your email/password was invalid'
+                message += f"{index}. {value[0]}\n📝 Status: {status}\n\n"
             elif value[1]['Last check'] == 'Provided Proxy is Dead, Please replace a new one and run the script again':
                 status = '📛 Provided Proxy is Dead, Please replace a new one and run the script again'
+                message += f"{index}. {value[0]}\n📝 Status: {status}\n\n"
             elif value[1]['Last check'] == 'Your TOTP secret was wrong !':
                 status = '📛 TOTP code was wrong'
+                message += f"{index}. {value[0]}\n📝 Status: {status}\n\n"
             else:
                 status = f'Farmed on {value[1]["Last check"]}'
                 new_points = value[1]["Today's points"]
                 total_earned += new_points
                 total_points = value[1]["Points"]
                 total_overall += total_points
+                message += f"{index}. {value[0]}\n📝 Status: {status}\n⭐️ Earned points: {new_points}\n🏅 Total points: {total_points}\n"
+                if redeem_message:
+                    message += redeem_message
+                else:
+                    message += "\n"
+
+            prBlue(message)
 
             # append new row on empty row from Row 2 onwards
             range_notation = f"'{ARGS.google_sheet[3]}'!A2"
@@ -3120,18 +3139,20 @@ def farmer():
         displayError(e)
         print('\n')
         ERROR = True
-        if browser is not None:
-            browser.quit()
+        LOGS[CURRENT_ACCOUNT]["Last check"] = "Unknown error !"
+        FINISHED_ACCOUNTS.append(CURRENT_ACCOUNT)
+        updateLogs()
+        cleanLogs()
         checkInternetConnection()
         farmer()
 
     else:
+        prBlue('[INFO] It seems all ok.\n')
         if ARGS.telegram or ARGS.discord:
             message = createMessage()
             sendReportToMessenger(message)
         if ARGS.google_sheet:
             logOnGoogleSpreadsheet()
-
         FINISHED_ACCOUNTS.clear()
 
 
